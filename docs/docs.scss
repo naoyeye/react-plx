@@ -41,7 +41,7 @@ body {
 
 html,
 body {
-  overflow-x: hidden;
+  // overflow-x: hidden;
   width: 100%;
 }
 
@@ -142,6 +142,42 @@ h4 {
 
 .Demo {
   text-align: center;
+}
+
+.ClipPathWrapper {
+  position: relative;
+  height: 400vh;
+}
+
+.ClipPath {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+
+  .section {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 100vh;
+    background: center center no-repeat;
+    background-size: cover;
+  }
+
+  .section-1 {
+    background-image: url('https://img.php.cn/upload/article/000/000/006/5d731811d16a1501.jpg');
+    z-index: 3;
+  }
+
+  .section-2 {
+    background-image: url('https://www.apple.com/105/media/us/airpods-pro/2019/1299e2f5_9206_4470_b28e_08307a42f19b/anim/sequence/large/01-hero-lightpass/0033.jpg');
+    z-index: 2;
+  }
+
+  .section-2 {
+    background-image: url('http://www.cuiniaoshijue.com/assets/img/background/img-30.jpg');
+    z-index: 1;
+  }
 }
 
 .Explosion {

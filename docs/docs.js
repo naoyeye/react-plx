@@ -8,6 +8,7 @@ import Explosion from './explosion';
 import Phone from './phone';
 import Links from './links';
 import StickyText from './sticky-text';
+import ClipPath from './clip-path';
 import Plx from '../source/index';
 
 import './docs.scss';
@@ -60,6 +61,8 @@ const Example = class extends React.Component {
           <div className='StickyText-trigger' />
           <StickyText />
         </div>
+
+        <ClipPath />
 
         <div className='Footer'>
           <div className='Content'>

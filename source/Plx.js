@@ -158,6 +158,19 @@ const FILTER_PROPERTIES = [
   'sepia',
 ];
 
+const CLIP_PATH_MAP = {
+  inset: (value, unit = '%') => `inset(${ value.t }${ unit } ${ value.r }${ unit } ${ value.b }${ unit } ${ value.l }${ unit })`
+}
+
+const TRBL_PROPERTIES = [
+  'inset'
+];
+
+
+const CLIP_PATH_PROPERTIES = [
+  'inset'
+]
+
 // Props to be removed from passing directly to the component element
 const PROPS_TO_OMIT = [
   'animateWhenNotInViewport',
@@ -416,6 +429,25 @@ function colorParallax(scrollPosition, start, duration, startValue, endValue, ea
   return null;
 }
 
+// trbl : top right bottom left
+function trblParallax(scrollPosition, start, duration, startObject, endObject, easing) {
+  if (startObject && endObject) {
+    const t = parallax(scrollPosition, start, duration, startObject.t, endObject.t, easing);
+    const r = parallax(scrollPosition, start, duration, startObject.r, endObject.r, easing);
+    const b = parallax(scrollPosition, start, duration, startObject.b, endObject.b, easing);
+    const l = parallax(scrollPosition, start, duration, startObject.l, endObject.l, easing);
+
+    return {
+      t: parseInt(t, 10),
+      r: parseInt(r, 10),
+      b: parseInt(b, 10),
+      l: parseInt(l, 10),
+    };
+  }
+
+  return null;
+}
+
 // Applies property parallax to the style object
 function applyProperty(scrollPosition, propertyData, startPosition, duration, style, easing) {
   const {
@@ -428,7 +460,8 @@ function applyProperty(scrollPosition, propertyData, startPosition, duration, st
   // If property is one of the color properties
   // Use it's parallax method
   const isColor = COLOR_PROPERTIES.indexOf(property) > -1;
-  const parallaxMethod = isColor ? colorParallax : parallax;
+  const isTRBL = TRBL_PROPERTIES.indexOf(property) > -1;
+  const parallaxMethod = isColor ? colorParallax : isTRBL ? trblParallax : parallax;
 
   // Get new CSS value
   const value = parallaxMethod(
@@ -443,6 +476,7 @@ function applyProperty(scrollPosition, propertyData, startPosition, duration, st
   // Get transform function
   const transformMethod = TRANSFORM_MAP[property];
   const filterMethod = FILTER_MAP[property];
+  const clipPathMethod = CLIP_PATH_MAP[property];
   const newStyle = style;
 
   if (transformMethod) {
@@ -455,6 +489,9 @@ function applyProperty(scrollPosition, propertyData, startPosition, duration, st
     const propertyUnit = getUnit(property, unit);
     // Filters, apply value to filter function
     newStyle.filter[property] = filterMethod(value, propertyUnit);
+  } else if (clipPathMethod) {
+    const propertyUnit = getUnit(property, unit);
+    newStyle.clipPath[property] = clipPathMethod(value, propertyUnit);
   } else {
     // All other properties
     newStyle[property] = value;
@@ -548,6 +585,7 @@ function getNewState(scrollPosition, props, state, element) {
   let newStyle = {
     transform: {},
     filter: {},
+    clipPath: {}
   };
 
   // This means "componentDidMount" did happen and that we should show our element
@@ -686,6 +724,21 @@ function getNewState(scrollPosition, props, state, element) {
   // Concat filters and add webkit prefix
   newStyle.filter = filtersArray.join(' ');
   newStyle.WebkitFilter = newStyle.filter;
+
+
+  const clipPathArray = [];
+  CLIP_PATH_PROPERTIES.forEach(filterKey => {
+    if (newStyle.clipPath[filterKey]) {
+      clipPathArray.push(newStyle.clipPath[filterKey]);
+    }
+  });
+
+  // Concat filters and add webkit prefix
+  newStyle.clipPath = clipPathArray.join(' ');
+  // newStyle.WebkitClipPath = newStyle.clipPath;
+
+
+
 
   // "Stupid" check if style should be updated
   if (JSON.stringify(plxStyle) !== JSON.stringify(newStyle)) {
@@ -835,10 +888,12 @@ const propertiesItemType = PropTypes.shape({
   startValue: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.number,
+    PropTypes.object
   ]).isRequired,
   endValue: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.number,
+    PropTypes.object
   ]).isRequired,
   property: PropTypes.string.isRequired,
   unit: PropTypes.string,
